@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Infographic Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #060811;
+      --surface: #0f1422;
+      --card: #151c2e;
+      --border: rgba(255,255,255,0.08);
+      --accent: #6366f1;
+      --accent2: #22d3ee;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --danger: #ef4444;
+      --success: #22c55e;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── GRID BG ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    /* ── GLOW ORBS ── */
+    .orb {
+      position: fixed; border-radius: 50%;
+      filter: blur(80px); pointer-events: none; z-index: 0;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: rgba(99,102,241,0.12);
+      top: -150px; right: -150px;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: rgba(34,211,238,0.08);
+      bottom: -100px; left: -100px;
+    }
+
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 1100px; margin: 0 auto;
+      padding: 0 1.5rem 5rem;
+    }
+
+    /* ── NAV ── */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.5rem 0; margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+    }
+    .nav-badge {
+      font-size: .7rem; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; padding: .35rem .85rem;
+      background: rgba(99,102,241,0.15); color: var(--accent);
+      border: 1px solid rgba(99,102,241,0.3); border-radius: 99px;
+    }
+
+    /* ── HERO ── */
+    .hero { text-align: center; padding: 3rem 0 2.5rem; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: .72rem; font-weight: 600; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--accent2);
+      background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.2);
+      border-radius: 99px; padding: .4rem 1rem; margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-family: 'Syne', sans-serif; font-size: clamp(2.2rem,6vw,4rem);
+      font-weight: 800; line-height: 1.1; letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 span {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.1rem; color: var(--muted); max-width: 520px;
+      margin: 0 auto 2.5rem; line-height: 1.7; font-weight: 300;
+    }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      display: block;
+    }
+    .stat-label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 0 60px rgba(0,0,0,0.4);
+    }
+    .form-section-title {
+      font-family: 'Syne', sans-serif; font-size: .7rem; font-weight: 700;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1.25rem;
+    }
+
+    .topic-wrapper {
+      position: relative; margin-bottom: 1.75rem;
+    }
+    .topic-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1.1rem 1.5rem;
+      font-size: 1rem; font-family: 'DM Sans', sans-serif;
+      color: var(--text);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none; resize: none;
+    }
+    .topic-input::placeholder { color: var(--muted); }
+    .topic-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+    }
+
+    .options-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+    @media(max-width:680px){ .options-row { grid-template-columns: 1fr; } }
+
+    .option-group label {
+      display: block; font-size: .75rem; font-weight: 600;
+      color: var(--muted); text-transform: uppercase; letter-spacing: .1em;
+      margin-bottom: .6rem;
+    }
+    select {
+      width: 100%;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: .75rem 1rem;
+      font-size: .9rem; font-family: 'DM Sans', sans-serif;
+      color: var(--text); outline: none;
+      cursor: pointer;
+      transition: border-color .2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+    }
+    select:focus { border-color: var(--accent); }
+    select option { background: var(--card); }
+
+    /* THEME PICKER */
+    .theme-picker { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .theme-dot {
+      width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+      border: 2.5px solid transparent; transition: transform .15s, border-color .15s;
+      position: relative;
+    }
+    .theme-dot:hover { transform: scale(1.15); }
+    .theme-dot.active { border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,0.2); }
+    .theme-dot[data-theme="corporate"] { background: linear-gradient(135deg,#3b82f6,#06b6d4); }
+    .theme-dot[data-theme="vibrant"]   { background: linear-gradient(135deg,#f72585,#7209b7); }
+    .theme-dot[data-theme="nature"]    { background: linear-gradient(135deg,#34d399,#a3e635); }
+    .theme-dot[data-theme="sunset"]    { background: linear-gradient(135deg,#fb923c,#fbbf24); }
+    .theme-dot[data-theme="minimal"]   { background: linear-gradient(135deg,#e5e7eb,#9ca3af); }
+
+    /* GENERATE BTN */
+    .btn-generate {
+      width: 100%;
+      padding: 1.1rem 2rem;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1rem;
+      border: none; border-radius: 12px; cursor: pointer;
+      transition: opacity .2s, transform .15s;
+      letter-spacing: .03em;
+      display: flex; align-items: center; justify-content: center; gap: .6rem;
+    }
+    .btn-generate:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+    .btn-generate:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    /* SUGGESTIONS */
+    .suggestions {
+      display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.5rem;
+    }
+    .suggestion-chip {
+      font-size: .78rem; padding: .35rem .85rem;
+      background: rgba(99,102,241,0.1); color: var(--accent);
+      border: 1px solid rgba(99,102,241,0.25); border-radius: 99px;
+      cursor: pointer; transition: background .15s, transform .15s;
+      white-space: nowrap;
+    }
+    .suggestion-chip:hover {
+      background: rgba(99,102,241,0.2); transform: translateY(-1px);
+    }
+
+    /* ── LOADING ── */
+    #loading {
+      display: none; text-align: center; padding: 3rem 0;
+    }
+    .loader {
+      width: 48px; height: 48px; margin: 0 auto 1.25rem;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    .loading-text {
+      font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 600;
+      color: var(--accent); margin-bottom: .4rem;
+    }
+    .loading-sub { font-size: .85rem; color: var(--muted); }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ERROR ── */
+    #error {
+      display: none; margin-bottom: 1.5rem;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 12px; padding: 1rem 1.25rem;
+      color: #fca5a5; font-size: .9rem;
+    }
+
+    /* ── RESULT ── */
+    #result { display: none; }
+    .result-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .result-label {
+      font-family: 'Syne', sans-serif; font-size: .7rem; font-weight: 700;
+      letter-spacing: .18em; text-transform: uppercase; color: var(--success);
+    }
+    .result-actions { display: flex; gap: .6rem; }
+    .btn-action {
+      padding: .55rem 1.1rem; font-size: .82rem; font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text);
+      cursor: pointer; transition: all .15s;
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .btn-action:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-action.primary {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+    .btn-action.primary:hover { opacity: .85; }
+
+    .infographic-frame {
+      width: 100%; border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      background: #060811;
+    }
+    .infographic-frame iframe {
+      width: 100%; min-height: 700px; border: none;
+      display: block;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-section { margin-top: 4rem; }
+    .section-title {
+      font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800;
+      text-align: center; margin-bottom: .5rem;
+    }
+    .section-sub {
+      text-align: center; color: var(--muted); font-size: .95rem;
+      margin-bottom: 2.5rem; font-weight: 300;
+    }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .step-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.75rem 1.5rem;
+      transition: border-color .2s;
+    }
+    .step-card:hover { border-color: rgba(99,102,241,0.4); }
+    .step-num {
+      font-family: 'Syne', sans-serif; font-size: .7rem; font-weight: 800;
+      letter-spacing: .2em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1rem;
+    }
+    .step-icon { font-size: 2rem; margin-bottom: .75rem; display: block; }
+    .step-title {
+      font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+      margin-bottom: .5rem;
+    }
+    .step-desc { font-size: .85rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: var(--card); border: 1px solid var(--success);
+      color: var(--success); border-radius: 10px;
+      padding: .85rem 1.25rem; font-size: .875rem; font-weight: 500;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      transform: translateY(80px); opacity: 0;
+      transition: transform .3s, opacity .3s; z-index: 9999;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* Footer */
+    .site-footer {
+      margin-top: 4rem; text-align: center;
+      font-size: .78rem; color: var(--muted); opacity: .5;
+      border-top: 1px solid var(--border); padding-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="wrapper">
+    <!-- NAV -->
+    <nav>
+      <div class="logo">⬡ InfographAI</div>
+      <div class="nav-badge">Powered by Groq · LLaMA 3</div>
+    </nav>
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-eyebrow">✦ AI-Powered Visual Content</div>
+      <h1>Turn any topic into a <span>stunning infographic</span> in seconds</h1>
+      <p>Paste a topic, pick a style, and let AI craft a beautiful, data-rich infographic — ready to share or download.</p>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-num">5</span>
+          <span class="stat-label">Visual Themes</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">&lt;10s</span>
+          <span class="stat-label">Generation Time</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num">∞</span>
+          <span class="stat-label">Topics Supported</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-card">
+      <div class="form-section-title">✦ Quick Suggestions</div>
+      <div class="suggestions">
+        <span class="suggestion-chip" onclick="setSuggestion('Climate Change Impact on Global Economies')">🌍 Climate Change</span>
+        <span class="suggestion-chip" onclick="setSuggestion('The Rise of Artificial Intelligence in Healthcare')">🤖 AI in Healthcare</span>
+        <span class="suggestion-chip" onclick="setSuggestion('Remote Work Trends Post-Pandemic')">💼 Remote Work</span>
+        <span class="suggestion-chip" onclick="setSuggestion('Cryptocurrency and Blockchain Technology')">₿ Crypto</span>
+        <span class="suggestion-chip" onclick="setSuggestion('Mental Health Awareness in the Workplace')">🧠 Mental Health</span>
+        <span class="suggestion-chip" onclick="setSuggestion('Future of Electric Vehicles')">⚡ Electric Vehicles</span>
+        <span class="suggestion-chip" onclick="setSuggestion('Global Water Crisis Statistics')">💧 Water Crisis</span>
+      </div>
+
+      <div class="form-section-title">✦ Your Topic</div>
+      <div class="topic-wrapper">
+        <textarea
+          id="topicInput"
+          class="topic-input"
+          rows="2"
+          placeholder="e.g. The impact of social media on teen mental health, or Global food security statistics…"
+        ></textarea>
+      </div>
+
+      <div class="options-row">
+        <div class="option-group">
+          <label>🎨 Visual Style</label>
+          <div class="theme-picker" id="themePicker">
+            <div class="theme-dot active" data-theme="corporate" title="Corporate Blue" onclick="selectTheme(this)"></div>
+            <div class="theme-dot" data-theme="vibrant" title="Vibrant Purple/Pink" onclick="selectTheme(this)"></div>
+            <div class="theme-dot" data-theme="nature" title="Nature Green" onclick="selectTheme(this)"></div>
+            <div class="theme-dot" data-theme="sunset" title="Sunset Orange" onclick="selectTheme(this)"></div>
+            <div class="theme-dot" data-theme="minimal" title="Minimal Light" onclick="selectTheme(this)"></div>
+          </div>
+        </div>
+        <div class="option-group">
+          <label>📌 Key Points</label>
+          <select id="pointCount">
+            <option value="4">4 points</option>
+            <option value="6" selected>6 points</option>
+            <option value="8">8 points</option>
+          </select>
+        </div>
+        <div class="option-group">
+          <label>👥 Audience</label>
+          <select id="audience">
+            <option value="general">General Public</option>
+            <option value="professionals">Professionals</option>
+            <option value="students">Students</option>
+            <option value="executives">Executives</option>
+            <option value="researchers">Researchers</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="error"></div>
+
+      <button class="btn-generate" id="generateBtn" onclick="generate()">
+        <span id="btnText">✦ Generate Infographic</span>
+      </button>
+    </div>
+
+    <!-- LOADING -->
+    <div id="loading">
+      <div class="loader"></div>
+      <div class="loading-text">AI is crafting your infographic…</div>
+      <div class="loading-sub">Querying LLaMA 3 via Groq · Designing layout · Adding data</div>
+    </div>
+
+    <!-- RESULT -->
+    <div id="result">
+      <div class="result-topbar">
+        <div class="result-label">✓ Infographic Ready</div>
+        <div class="result-actions">
+          <button class="btn-action" onclick="copyHTML()">📋 Copy HTML</button>
+          <button class="btn-action" onclick="openFullscreen()">⛶ Fullscreen</button>
+          <button class="btn-action primary" onclick="downloadHTML()">⬇ Download</button>
+        </div>
+      </div>
+      <div class="infographic-frame">
+        <iframe id="infographicFrame" title="Generated Infographic"></iframe>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="how-section">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-sub">From idea to infographic in four simple steps</p>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">Step 01</div>
+          <span class="step-icon">✍️</span>
+          <div class="step-title">Enter Your Topic</div>
+          <div class="step-desc">Type any topic — a trend, a statistic, a concept, or a question you want to visualize.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">Step 02</div>
+          <span class="step-icon">🎨</span>
+          <div class="step-title">Pick a Style</div>
+          <div class="step-desc">Choose from 5 curated color themes to match your brand or presentation needs.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">Step 03</div>
+          <span class="step-icon">🤖</span>
+          <div class="step-title">AI Generates Content</div>
+          <div class="step-desc">LLaMA 3 via Groq analyzes your topic and creates key insights, stats, and facts in real time.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">Step 04</div>
+          <span class="step-icon">📤</span>
+          <div class="step-title">Download & Share</div>
+          <div class="step-desc">Copy the HTML, download the file, or open fullscreen to share in presentations or social media.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="site-footer">
+      Built with Groq + LLaMA 3 · InfographAI © 2025
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let selectedTheme = 'corporate';
+    let currentHTML = '';
+
+    function selectTheme(el) {
+      document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+      el.classList.add('active');
+      selectedTheme = el.dataset.theme;
+    }
+
+    function setSuggestion(text) {
+      document.getElementById('topicInput').value = text;
+      document.getElementById('topicInput').focus();
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('error');
+      el.textContent = '⚠ ' + msg;
+      el.style.display = 'block';
+    }
+
+    function hideError() {
+      document.getElementById('error').style.display = 'none';
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    async function generate() {
+      const topic = document.getElementById('topicInput').value.trim();
+      if (!topic) { showError('Please enter a topic first.'); return; }
+
+      hideError();
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('generateBtn').disabled = true;
+      document.getElementById('btnText').textContent = 'Generating…';
+
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            topic,
+            style: selectedTheme,
+            pointCount: parseInt(document.getElementById('pointCount').value),
+            audience: document.getElementById('audience').value,
+          }),
+        });
+
+        const json = await res.json();
+
+        if (!res.ok || !json.success) {
+          throw new Error(json.error || 'Generation failed');
+        }
+
+        currentHTML = json.infographicHTML;
+
+        const frame = document.getElementById('infographicFrame');
+        frame.srcdoc = currentHTML;
+        frame.onload = () => {
+          // auto-adjust height
+          try {
+            const h = frame.contentDocument.body.scrollHeight;
+            frame.style.height = Math.max(600, h + 40) + 'px';
+          } catch(e) {}
+        };
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        showToast('✓ Infographic generated successfully!');
+
+      } catch (err) {
+        document.getElementById('loading').style.display = 'none';
+        showError(err.message);
+      } finally {
+        document.getElementById('generateBtn').disabled = false;
+        document.getElementById('btnText').textContent = '✦ Generate Infographic';
+      }
+    }
+
+    function downloadHTML() {
+      if (!currentHTML) return;
+      const blob = new Blob([currentHTML], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'infographic.html';
+      a.click();
+      showToast('⬇ Downloading infographic…');
+    }
+
+    function copyHTML() {
+      if (!currentHTML) return;
+      navigator.clipboard.writeText(currentHTML).then(() => showToast('📋 HTML copied to clipboard!'));
+    }
+
+    function openFullscreen() {
+      if (!currentHTML) return;
+      const win = window.open('', '_blank');
+      win.document.write(currentHTML);
+      win.document.close();
+    }
+
+    // Enter key to generate
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.ctrlKey) generate();
+    });
+  </script>
+</body>
+</html>
