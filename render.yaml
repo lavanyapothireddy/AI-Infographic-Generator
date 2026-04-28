@@ -1,0 +1,15 @@
+# render.yaml — Render deployment config
+# Commit this file to your GitHub repo root
+
+services:
+  - type: web
+    name: ai-infographic-generator
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GROQ_API_KEY
+        sync: false   # You will set this manually in Render dashboard
