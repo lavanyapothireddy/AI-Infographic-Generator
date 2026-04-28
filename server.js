@@ -95,6 +95,18 @@ function getIcon(text) {
   }
   return ICONS.default;
 }
+function copyOutput() {
+  const element = document.querySelector(".infographic");
+
+  if (!element) {
+    alert("Nothing to copy!");
+    return;
+  }
+
+  navigator.clipboard.writeText(element.innerText);
+
+  alert("Copied successfully!");
+}
 
 // ─── AI GENERATION ROUTE ─────────────────────────────────────────────────────
 app.post("/api/generate", async (req, res) => {
