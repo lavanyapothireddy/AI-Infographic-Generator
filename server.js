@@ -96,16 +96,26 @@ function getIcon(text) {
   return ICONS.default;
 }
 function copyOutput() {
-  const element = document.querySelector(".infographic");
+  const iframe = document.getElementById("previewFrame");
+
+  if (!iframe) {
+    alert("Preview not found!");
+    return;
+  }
+
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  const element = doc.querySelector(".infographic");
 
   if (!element) {
     alert("Nothing to copy!");
     return;
   }
 
-  navigator.clipboard.writeText(element.innerText);
+  const text = element.innerText;
 
-  alert("Copied successfully!");
+  navigator.clipboard.writeText(text)
+    .then(() => alert("Copied successfully!"))
+    .catch(() => alert("Copy failed"));
 }
 
 // ─── AI GENERATION ROUTE ─────────────────────────────────────────────────────
