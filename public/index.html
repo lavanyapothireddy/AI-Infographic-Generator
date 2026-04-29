@@ -597,34 +597,61 @@
       showToast('⬇ Downloading infographic…');
     }
 
-    // ✅ FIX: renamed to copyOutput() to match the button's onclick
-    // Also added textarea fallback for non-HTTPS environments
+    // Copies the visible text content of the infographic (not HTML)
     function copyOutput() {
       if (!currentHTML) {
         showToast('⚠ Nothing to copy yet — generate first!');
         return;
       }
+
+      // Extract readable text from the iframe's rendered content
+      const frame = document.getElementById('infographicFrame');
+      let text = '';
+
+      try {
+        const doc = frame.contentDocument || frame.contentWindow.document;
+        const infographic = doc.querySelector('.infographic');
+        if (infographic) {
+          // Walk through visible elements in order and build clean text
+          const elements = infographic.querySelectorAll(
+            'h1, h2, h3, p, .subtitle, .point-title, .point-desc, .point-stat, .fact-item, .cta p, .footer, .header-tag, .intro'
+          );
+          const lines = [];
+          elements.forEach(el => {
+            const t = el.innerText.trim();
+            if (t) lines.push(t);
+          });
+          text = lines.join('\n\n');
+        }
+      } catch (e) {
+        showToast('❌ Could not read infographic content');
+        return;
+      }
+
+      if (!text) {
+        showToast('⚠ No text content found');
+        return;
+      }
+
       if (navigator.clipboard && window.isSecureContext) {
-        // Modern API (works on HTTPS / localhost)
-        navigator.clipboard.writeText(currentHTML)
-          .then(() => showToast('📋 HTML copied to clipboard!'))
-          .catch(() => fallbackCopy());
+        navigator.clipboard.writeText(text)
+          .then(() => showToast('📋 Infographic text copied!'))
+          .catch(() => fallbackCopy(text));
       } else {
-        // Fallback for HTTP deployments
-        fallbackCopy();
+        fallbackCopy(text);
       }
     }
 
-    function fallbackCopy() {
+    function fallbackCopy(text) {
       const textarea = document.createElement('textarea');
-      textarea.value = currentHTML;
+      textarea.value = text;
       textarea.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
       document.body.appendChild(textarea);
       textarea.focus();
       textarea.select();
       try {
         document.execCommand('copy');
-        showToast('📋 HTML copied to clipboard!');
+        showToast('📋 Infographic text copied!');
       } catch (e) {
         showToast('❌ Copy failed — use Download instead');
       }
