@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -380,7 +381,16 @@
 
     <!-- FORM -->
     <div class="form-card">
-      
+      <div class="form-section-title">✦ Quick Suggestions</div>
+      <div class="suggestions">
+        <span class="suggestion-chip" onclick="setSuggestion('Climate Change Impact on Global Economies')">🌍 Climate Change</span>
+        <span class="suggestion-chip" onclick="setSuggestion('The Rise of Artificial Intelligence in Healthcare')">🤖 AI in Healthcare</span>
+        <span class="suggestion-chip" onclick="setSuggestion('Remote Work Trends Post-Pandemic')">💼 Remote Work</span>
+        <span class="suggestion-chip" onclick="setSuggestion('Cryptocurrency and Blockchain Technology')">₿ Crypto</span>
+        <span class="suggestion-chip" onclick="setSuggestion('Mental Health Awareness in the Workplace')">🧠 Mental Health</span>
+        <span class="suggestion-chip" onclick="setSuggestion('Future of Electric Vehicles')">⚡ Electric Vehicles</span>
+        <span class="suggestion-chip" onclick="setSuggestion('Global Water Crisis Statistics')">💧 Water Crisis</span>
+      </div>
 
       <div class="form-section-title">✦ Your Topic</div>
       <div class="topic-wrapper">
@@ -442,7 +452,7 @@
       <div class="result-topbar">
         <div class="result-label">✓ Infographic Ready</div>
         <div class="result-actions">
-          <button class="btn-action" onclick="copyOutput()">📋 Copy</button>
+          <button class="btn-action" onclick="copyHTML()">📋 Copy HTML</button>
           <button class="btn-action" onclick="openFullscreen()">⛶ Fullscreen</button>
           <button class="btn-action primary" onclick="downloadHTML()">⬇ Download</button>
         </div>
@@ -557,7 +567,6 @@
         const frame = document.getElementById('infographicFrame');
         frame.srcdoc = currentHTML;
         frame.onload = () => {
-          // auto-adjust height
           try {
             const h = frame.contentDocument.body.scrollHeight;
             frame.style.height = Math.max(600, h + 40) + 'px';
@@ -588,9 +597,38 @@
       showToast('⬇ Downloading infographic…');
     }
 
-    function copyHTML() {
-      if (!currentHTML) return;
-      navigator.clipboard.writeText(currentHTML).then(() => showToast('📋 HTML copied to clipboard!'));
+    // ✅ FIX: renamed to copyOutput() to match the button's onclick
+    // Also added textarea fallback for non-HTTPS environments
+    function copyOutput() {
+      if (!currentHTML) {
+        showToast('⚠ Nothing to copy yet — generate first!');
+        return;
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        // Modern API (works on HTTPS / localhost)
+        navigator.clipboard.writeText(currentHTML)
+          .then(() => showToast('📋 HTML copied to clipboard!'))
+          .catch(() => fallbackCopy());
+      } else {
+        // Fallback for HTTP deployments
+        fallbackCopy();
+      }
+    }
+
+    function fallbackCopy() {
+      const textarea = document.createElement('textarea');
+      textarea.value = currentHTML;
+      textarea.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast('📋 HTML copied to clipboard!');
+      } catch (e) {
+        showToast('❌ Copy failed — use Download instead');
+      }
+      document.body.removeChild(textarea);
     }
 
     function openFullscreen() {
@@ -600,7 +638,7 @@
       win.document.close();
     }
 
-    // Enter key to generate
+    // Ctrl+Enter to generate
     document.addEventListener('keydown', e => {
       if (e.key === 'Enter' && e.ctrlKey) generate();
     });
